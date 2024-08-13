@@ -1,11 +1,17 @@
 const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
+const User = require('../models/User');
 
 // Thêm đơn hàng mới
 exports.addOrder = async (req, res) => {
     try {
         const { customer, products, totalPrice, status } = req.body;
+        const customerDetails = await User.findById(customer);
 
+        // Kiểm tra thông tin bắt buộc
+        if (!customerDetails.phone || !customerDetails.address) {
+            return res.status(400).json({ message: 'Bạn cần cung cấp đầy đủ thông tin số điện thoại và địa chỉ trước khi đặt hàng.' });
+        }
         // Kiểm tra thông tin sản phẩm
         const productDetails = await Promise.all(
             products.map(async (item) => {
