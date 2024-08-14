@@ -52,7 +52,7 @@ exports.getProductById = async (req, res) => {
 exports.getProductBySlug = async (req, res) => {
     try {
         const productSlug = req.params.slug; // Lấy slug từ tham số
-        const product = await Product.findOne({ slug: slug }).populate('categorySlug'); // Tìm sản phẩm theo slug và populate với categorySlug
+        const product = await Product.findOne({ slug: productSlug }).populate('categorySlug'); // Tìm sản phẩm theo slug và populate với categorySlug
 
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
