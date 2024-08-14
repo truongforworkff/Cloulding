@@ -1,6 +1,6 @@
 const Order = require('../models/orderModel');
 const Product = require('../models/productModel');
-const User = require('../models/User');
+const User = require('../models/userModel');
 
 // Thêm đơn hàng mới
 exports.addOrder = async (req, res) => {
