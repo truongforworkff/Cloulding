@@ -32,6 +32,8 @@ app.use(cors());
 const categoryRoutes = require('./routes/categories');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const usersRouters = require('./routes/users')
+app.use('/api/users', usersRouters)
 app.use('/api/oders', orderRoutes)
 app.use('/api/category', categoryRoutes);
 app.use('/api/products', productRoutes);

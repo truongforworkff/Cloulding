@@ -1,9 +1,14 @@
 var express = require('express');
-var router = express.Router();
+const authController = require('../controllers/userController');
+const router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+// Route đăng ký
+router.post('/register', authController.register);
+
+// Route đăng nhập
+router.post('/login', authController.login);
+
+// Route logout
+router.post('/logout', authController.logout);
 
 module.exports = router;
