@@ -49,6 +49,21 @@ exports.getProductById = async (req, res) => {
     }
 };
 
+exports.getProductBySlug = async (req, res) => {
+    try {
+        const productSlug = req.params.slug; // Lấy slug từ tham số
+        const product = await Product.findOne({ slug: productSlug }).populate('categorySlug'); // Tìm sản phẩm theo slug và populate với categorySlug
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        res.status(200).json(product);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // Thêm sản phẩm mới
 exports.addProduct = async (req, res) => {
     try {
