@@ -9,7 +9,7 @@ exports.getAllProducts = async (req, res) => {
         
         // Định dạng lại kết quả
         const formattedProducts = products.map(product => ({
-           
+            id: product._id,
             title: product.title,
             price: product.price,
             image01: product.image01,
