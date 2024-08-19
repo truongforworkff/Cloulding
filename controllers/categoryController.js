@@ -5,6 +5,7 @@ exports.getAllCategories = async (req, res) => {
     try {
         const categories = await Category.find();
         const formatted = categories.map(category => ({
+            id: category._id,
             display : category.display,
             categorySlug: category.slug
            
