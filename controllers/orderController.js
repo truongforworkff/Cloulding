@@ -5,6 +5,8 @@ const User = require('../models/userModel');
 // Thêm đơn hàng mới
 exports.addOrder = async (req, res) => {
     try {
+        console.log(req.body); // Log thông tin nhận được để kiểm tra
+
         const { customer, products, totalPrice, status } = req.body;
         const customerDetails = await User.findById(customer);
 
@@ -12,17 +14,21 @@ exports.addOrder = async (req, res) => {
         if (!customerDetails.phone || !customerDetails.address) {
             return res.status(400).json({ message: 'Bạn cần cung cấp đầy đủ thông tin số điện thoại và địa chỉ trước khi đặt hàng.' });
         }
+
         // Kiểm tra thông tin sản phẩm
         const productDetails = await Promise.all(
             products.map(async (item) => {
                 const product = await Product.findById(item.productId); // Tìm sản phẩm theo ID
+                if (!product) {
+                    throw new Error(`Product with ID ${item.productId} not found.`);
+                }
                 return {
                     productId: item.productId,
                     title: product.title, // Lưu tiêu đề sản phẩm
                     quantity: item.quantity,
                     price: product.price, // Giá của sản phẩm từ bảng Product
-                    size: item.size, // Kích thước từ yêu cầu
-                    color: item.color // Màu sắc từ yêu cầu
+                    size: item.size || '', // Kích thước từ yêu cầu, nếu không có thì để trống
+                    color: item.color || '' // Màu sắc từ yêu cầu, nếu không có thì để trống
                 };
             })
         );
@@ -37,9 +43,11 @@ exports.addOrder = async (req, res) => {
         const savedOrder = await newOrder.save();
         res.status(201).json(savedOrder);
     } catch (error) {
+        console.error('Error in addOrder:', error); // Log lỗi chi tiết để kiểm tra
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Lấy tất cả đơn hàng
 exports.getAllOrders = async (req, res) => {
