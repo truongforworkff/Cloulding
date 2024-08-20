@@ -41,7 +41,10 @@ exports.addOrder = async (req, res) => {
         });
 
         const savedOrder = await newOrder.save();
-        res.status(201).json(savedOrder);
+        res.status(201).json({
+    message: 'Order created successfully!',
+    order: savedOrder
+});
     } catch (error) {
         console.error('Error in addOrder:', error); // Log lỗi chi tiết để kiểm tra
         res.status(500).json({ message: error.message });
