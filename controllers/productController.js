@@ -15,6 +15,7 @@ exports.getAllProducts = async (req, res) => {
             image01: product.image01,
             image02: product.image02,
             categorySlug: product.categorySlug.slug,
+            categoryId: product.categorySlug,
             colors: product.colors, // Chỉ lấy display của category
             slug: product.slug,
             size: product.size,
