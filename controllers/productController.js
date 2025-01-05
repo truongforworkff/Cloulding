@@ -2,11 +2,15 @@ const Product = require('../models/productModel');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 
+const cloudinary = require('../config/cloudinaryConfig');
+
 
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await Product.find().populate('categorySlug');
         
+
+
         // Định dạng lại kết quả
         const formattedProducts = products.map(product => ({
             id: product._id,
@@ -66,20 +70,64 @@ exports.getProductBySlug = async (req, res) => {
 };
 
 // Thêm sản phẩm mới
+// exports.addProduct = async (req, res) => {
+//     try {
+//         const { title, price, image01, image02, categorySlug, slug, description, colors, size } = req.body;
+
+//         const newProduct = new Product({
+//             title,
+//             price,
+//             image01,
+//             image02,
+//             categorySlug,
+//             slug,
+//             description,
+//             colors,
+//             size
+//         });
+
+//         const savedProduct = await newProduct.save();
+//         res.status(201).json(savedProduct);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+
 exports.addProduct = async (req, res) => {
     try {
-        const { title, price, image01, image02, categorySlug, slug, description, colors, size } = req.body;
+        const { title, price, categorySlug, slug, description, colors, size } = req.body;
 
+        // Upload ảnh lên Cloudinary
+        let image01Url = '';
+        let image02Url = '';
+
+        if (req.files.image01) {
+            const uploadResponse = await cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                if (error) throw error;
+                image01Url = result.secure_url;
+            });
+            uploadResponse.end(req.files.image01[0].buffer);
+        }
+
+        if (req.files.image02) {
+            const uploadResponse = await cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                if (error) throw error;
+                image02Url = result.secure_url;
+            });
+            uploadResponse.end(req.files.image02[0].buffer);
+        }
+
+        // Tạo sản phẩm mới
         const newProduct = new Product({
             title,
             price,
-            image01,
-            image02,
+            image01: image01Url,
+            image02: image02Url,
             categorySlug,
             slug,
             description,
-            colors,
-            size
+            colors: colors ? JSON.parse(colors) : [],
+            size: size ? JSON.parse(size) : [],
         });
 
         const savedProduct = await newProduct.save();
