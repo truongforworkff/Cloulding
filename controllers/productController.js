@@ -101,6 +101,8 @@ exports.addProduct = async (req, res) => {
         let image01Url = '';
         let image02Url = '';
 
+        console.log(req.files)
+
         if (req.files.image01) {
             const uploadResponse = await cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
                 if (error) throw error;

@@ -4,17 +4,13 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
 
-const multer = require('multer');
+const uploadMiddleware = require('../middlewares/uploadMiddleware');
 
-// Cấu hình Multer (bộ xử lý file upload)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-// Route thêm sản phẩm với upload ảnh
-router.post('/', upload.fields([
+router.post('/', uploadMiddleware.fields([
     { name: 'image01', maxCount: 1 },
     { name: 'image02', maxCount: 1 },
 ]), productController.addProduct);
+
 
 router.get('/', productController.getAllProducts);
 router.get('/:id([0-9a-fA-F]{24})', productController.getProductById);
