@@ -96,30 +96,28 @@ exports.getProductBySlug = async (req, res) => {
 exports.addProduct = async (req, res) => {
     try {
         const { title, price, categorySlug, slug, description, colors, size } = req.body;
-
-        // Upload ảnh lên Cloudinary
         let image01Url = '';
         let image02Url = '';
 
-        console.log(req.files)
+        console.log('Files received:', req.files);
 
+        // Lấy URL từ thuộc tính path
         if (req.files.image01) {
-            const uploadResponse = await cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
-                if (error) throw error;
-                image01Url = result.secure_url;
-            });
-            uploadResponse.end(req.files.image01[0].buffer);
+            image01Url = req.files.image01[0].path;
+            // console.log('Image 01 URL:', image01Url);
         }
 
         if (req.files.image02) {
-            const uploadResponse = await cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
-                if (error) throw error;
-                image02Url = result.secure_url;
-            });
-            uploadResponse.end(req.files.image02[0].buffer);
+            image02Url = req.files.image02[0].path;
+            // console.log('Image 02 URL:', image02Url);
         }
 
-        // Tạo sản phẩm mới
+        console.log('Final Image URLs:', {
+            image01: image01Url,
+            image02: image02Url
+        });
+
+        // Tạo sản phẩm mới với URLs
         const newProduct = new Product({
             title,
             price,
@@ -135,6 +133,7 @@ exports.addProduct = async (req, res) => {
         const savedProduct = await newProduct.save();
         res.status(201).json(savedProduct);
     } catch (error) {
+        console.error('Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -144,18 +143,66 @@ exports.addProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { title, price, image01, image02, categorySlug, slug, description, colors, size } = req.body;
+        const { title, price, categorySlug, slug, description, colors, size } = req.body;
+
+        let image01Url = '';
+        let image02Url = '';
+
+      
+
+        // Lấy URL từ thuộc tính path
+        if (req.files.image01) {
+            image01Url = req.files.image01[0].path;
+        }
+
+        if (req.files.image02) {
+            image02Url = req.files.image02[0].path;
+        }
+
+        console.log('Final Image URLs:', {
+            image01: image01Url,
+            image02: image02Url
+        });
 
         const updatedProduct = await Product.findByIdAndUpdate(
             productId,
-            { title, price, image01, image02, categorySlug, slug, description, colors, size },
-            { new: true } // Trả về tài liệu đã cập nhật
+            { title, price, image01: image01Url, image02: image02Url, categorySlug, slug, description, colors, size },
+            { new: true }
         );
 
-        if (!updatedProduct) return res.status(404).json({ message: 'Product not found' });
-        res.json(updatedProduct);
+        if (!updatedProduct) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy sản phẩm',
+                productId
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Cập nhật sản phẩm thành công',
+            product: updatedProduct,
+            updatedFields: {
+                title: title || 'Không thay đổi',
+                price: price || 'Không thay đổi',
+                image01: image01Url || 'Không thay đổi',
+                image02: image02Url || 'Không thay đổi',
+                categorySlug: categorySlug || 'Không thay đổi',
+                slug: slug || 'Không thay đổi',
+                description: description || 'Không thay đổi',
+                colors: colors || 'Không thay đổi',
+                size: size || 'Không thay đổi'
+            }
+        });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error updating product:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi khi cập nhật sản phẩm',
+            error: error.message,
+            details: error.stack
+        });
     }
 };
 
